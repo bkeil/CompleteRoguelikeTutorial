@@ -18,12 +18,12 @@ class Action:
     @property
     def engine(self) -> Engine:
         """Return the engine this action belongs to."""
-        return self.entity.game_map.engine
+        return self.entity.parent.engine
 
     @property
     def game_map(self) -> GameMap:
         """Return the game map this action belongs to."""
-        return self.entity.game_map
+        return self.entity.parent
 
     def perform(self) -> None:
         """Perform this action with the objects needed to determine its scope.
