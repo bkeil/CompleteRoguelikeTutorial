@@ -84,6 +84,8 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, max_monsters: int, m
 
             if item_chance < 0.7:
                 entity_types.health_potion.spawn(dungeon, x, y)
+            elif item_chance < 0.8:
+                entity_types.fireball_scroll.spawn(dungeon, x, y)
             elif item_chance < 0.9:
                 entity_types.confusion_scroll.spawn(dungeon, x, y)
             else:
