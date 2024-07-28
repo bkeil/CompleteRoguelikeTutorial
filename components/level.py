@@ -12,12 +12,12 @@ class Level(BaseComponent):
     parent: Actor
 
     def __init__(
-        self,
-        current_level: int = 1,
-        current_xp: int = 0,
-        level_up_base: int = 0,
-        level_up_factor: int = 150,
-        xp_given: int = 0,
+            self,
+            current_level: int = 1,
+            current_xp: int = 0,
+            level_up_base: int = 0,
+            level_up_factor: int = 150,
+            xp_given: int = 0,
     ):
         self.current_level = current_level
         self.current_xp = current_xp
@@ -48,6 +48,7 @@ class Level(BaseComponent):
 
     def increase_level(self) -> None:
         self.current_xp -= self.experience_to_next_level
+        self.xp_given += 15
 
         self.current_level += 1
 
@@ -55,20 +56,23 @@ class Level(BaseComponent):
         self.parent.fighter.max_hp += amount
         self.parent.fighter.hp += amount
 
-        self.engine.message_log.add_message("Your health improves!")
+        if self.parent and self.parent is self.engine.player:
+            self.engine.message_log.add_message("Your health improves!")
 
         self.increase_level()
 
     def increase_power(self, amount: int = 1) -> None:
         self.parent.fighter.base_power += amount
 
-        self.engine.message_log.add_message("You feel stronger!")
+        if self.parent and self.parent is self.engine.player:
+            self.engine.message_log.add_message("You feel stronger!")
 
         self.increase_level()
 
     def increase_defense(self, amount: int = 1) -> None:
         self.parent.fighter.base_defense += amount
 
-        self.engine.message_log.add_message("Your skin is getting thicker!")
+        if self.parent and self.parent is self.engine.player:
+            self.engine.message_log.add_message("Your skin is getting thicker!")
 
         self.increase_level()

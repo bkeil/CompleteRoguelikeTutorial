@@ -5,6 +5,7 @@ from typing import Dict, Iterator, List, Tuple, TYPE_CHECKING
 
 import tcod
 
+from entity import Actor
 import entity_types
 from game_map import GameMap
 import tile_types
@@ -12,7 +13,6 @@ import tile_types
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity
-
 
 max_items_by_floor = [
     (1, 1),
@@ -55,9 +55,9 @@ def get_max_value_for_floor(
 
 
 def get_entities_at_random(
-    weighted_chances_by_floor: Dict[int, List[Tuple[Entity, int]]],
-    number_of_entities: int,
-    floor: int,
+        weighted_chances_by_floor: Dict[int, List[Tuple[Entity, int]]],
+        number_of_entities: int,
+        floor: int,
 ) -> List[Entity]:
     entity_weighted_chances = {}
 
@@ -126,7 +126,7 @@ def tunnel_between(
         yield x, y
 
 
-def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,) -> None:
+def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int) -> None:
     number_of_monsters = random.randint(
         0, get_max_value_for_floor(max_monsters_by_floor, floor_number)
     )
@@ -141,11 +141,17 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,) 
         item_chances, number_of_items, floor_number
     )
 
-    for entity in monsters + items:
+    for entity_type in monsters + items:
         x = random.randint(room.x1 + 1, room.x2 - 1)
         y = random.randint(room.y1 + 1, room.y2 - 1)
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
-            entity.spawn(dungeon, x, y)
+            entity = entity_type.spawn(dungeon, x, y)
+            if isinstance(entity, Actor):
+                for _ in range(floor_number - 1):
+                    if random.random() < 0.5:
+                        entity.level.increase_power(1)
+                    else:
+                        entity.level.increase_defense(1)
 
 
 def generate_dungeon(
