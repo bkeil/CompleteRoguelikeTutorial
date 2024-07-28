@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, Iterator, List, Tuple, TYPE_CHECKING
+from typing import Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 import tcod
 
@@ -148,10 +148,43 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int) -
             entity = entity_type.spawn(dungeon, x, y)
             if isinstance(entity, Actor):
                 for _ in range(floor_number - 1):
-                    if random.random() < 0.5:
+                    if random.random() < 0.7:
                         entity.level.increase_power(1)
                     else:
                         entity.level.increase_defense(1)
+
+
+def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BSP, RectangularRoom],
+              current_floor: int) -> None:
+    # print('Dig a room for %s.' % node)
+    room_width = random.randint(node.width // 2, node.width - 2)
+    room_height = random.randint(node.height // 2, node.height - 2)
+
+    x = node.x + (node.width - room_width) // 2
+    y = node.y + (node.height - room_height) // 2
+
+    # "RectangularRoom" class makes rectangles easier to work with
+    new_room = RectangularRoom(x, y, room_width, room_height)
+    # Run through the other rooms and see if they intersect with this one.
+    if any(new_room.intersects(other_room) for other_room in node_rooms.values()):
+        return  # This room intersects, so go to the next attempt.
+    # If there are no intersections then the room is valid.
+
+    # Dig out this room's inner area.
+    dungeon.tiles[new_room.inner] = tile_types.floor
+
+    place_entities(new_room, dungeon, current_floor)
+
+    node_rooms[node] = new_room
+
+
+def connect_nodes(dungeon: GameMap, nodes: Tuple[tcod.bsp.BSP, tcod.bsp.BSP],
+                     node_rooms: Dict[tcod.bsp.BSP, RectangularRoom]) -> None:
+    # print('Connect the nodes:\n%s\n%s' % nodes)
+    centers = (node_rooms[child].center for child in nodes)
+    for x, y in tunnel_between(*centers):
+        dungeon.tiles[x, y] = tile_types.floor
+
 
 
 def generate_dungeon(
@@ -166,42 +199,35 @@ def generate_dungeon(
     player = engine.player
     dungeon = GameMap(engine, map_width, map_height, entities=[player])
 
-    rooms: List[RectangularRoom] = []
-    center_of_last_room = (0, 0)
+    bsp = tcod.bsp.BSP(x=0, y=0, width=dungeon.width, height=dungeon.height)
+    bsp.split_recursive(
+        depth=7,
+        min_width=8,
+        min_height=8,
+        max_horizontal_ratio=2,
+        max_vertical_ratio=2,
+    )
 
-    for r in range(max_rooms):
-        room_width = random.randint(room_min_size, room_max_size)
-        room_height = random.randint(room_min_size, room_max_size)
+    node_rooms = {}
+    for node in bsp.inverted_level_order():
+        if node.children:
+            connect_nodes(dungeon, node.children, node_rooms)
+            node_rooms[node] = node_rooms[node.children[0]]
+        else:
+            make_room(dungeon, node, node_rooms, engine.game_world.current_floor)
 
-        x = random.randint(0, dungeon.width - room_width - 1)
-        y = random.randint(0, dungeon.height - room_height - 1)
+    rooms = list(node_rooms.values())
+    player.place(*rooms[0].center, dungeon)
 
-        # "RectangularRoom" class makes rectangles easier to work with
-        new_room = RectangularRoom(x, y, room_width, room_height)
+    # Add some extra tunnels to have a chance at making some shortcuts.
+    nodes = list(node_rooms.keys())
+    random.shuffle(nodes)
+    i = min(6, len(rooms) - 2)
+    while i >= 0:
+        connect_nodes(dungeon, (nodes[i], nodes[i+1]), node_rooms)
+        i -= 2
 
-        # Run through the other rooms and see if they intersect with this one.
-        if any(new_room.intersects(other_room) for other_room in rooms):
-            continue  # This room intersects, so go to the next attempt.
-        # If there are no intersections then the room is valid.
-
-        # Dig out this room's inner area.
-        dungeon.tiles[new_room.inner] = tile_types.floor
-
-        if len(rooms) == 0:
-            # The first room, where the player starts.
-            player.place(*new_room.center, dungeon)
-        else:  # All rooms after the first.
-            # Dig out a tunnel between this room and the previous one.
-            for x, y in tunnel_between(rooms[-1].center, new_room.center):
-                dungeon.tiles[x, y] = tile_types.floor
-            center_of_last_room = new_room.center
-
-        place_entities(new_room, dungeon, engine.game_world.current_floor)
-
-        dungeon.tiles[center_of_last_room] = tile_types.down_stairs
-        dungeon.downstairs_location = center_of_last_room
-
-        # Finally, append the new room to the list.
-        rooms.append(new_room)
+    dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
+    dungeon.downstairs_location = rooms[-1].center
 
     return dungeon
