@@ -216,17 +216,17 @@ def generate_dungeon(
         else:
             make_room(dungeon, node, node_rooms, engine.game_world.current_floor)
 
-    rooms = list(node_rooms.values())
-    player.place(*rooms[0].center, dungeon)
-
     # Add some extra tunnels to have a chance at making some shortcuts.
     nodes = list(node_rooms.keys())
     random.shuffle(nodes)
-    i = min(6, len(rooms) - 2)
+    i = min(8, len(nodes) - 2)
     while i >= 0:
         connect_nodes(dungeon, (nodes[i], nodes[i+1]), node_rooms)
         i -= 2
 
+    rooms = list(node_rooms.values())
+    random.shuffle(rooms)
+    player.place(*rooms[0].center, dungeon)
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
     dungeon.downstairs_location = rooms[-1].center
 
