@@ -5,6 +5,7 @@ from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 import numpy as np  # type: ignore
 from tcod.console import Console
 
+import color
 from entity import Actor, Item
 import tile_types
 
@@ -22,6 +23,9 @@ class GameMap:
         self.tiles = np.full((width, height), fill_value=tile_types.wall, order="F")
         self.entities = set(entities)
 
+        self.lit = np.full(
+            (width, height), fill_value=False, order="F"
+        )  # Tiles that are currently lit
         self.visible = np.full(
             (width, height), fill_value=False, order="F"
         )  # Tiles the player can currently see
@@ -74,8 +78,8 @@ class GameMap:
     def render(self, console: Console) -> None:
         console.rgb[0: self.width, 0: self.height] = np.select(
 
-            condlist=[self.visible, self.explored],
-            choicelist=[self.tiles["light"], self.tiles["dark"]],
+            condlist=[self.lit, self.visible, self.explored],
+            choicelist=[self.tiles["light"], self.tiles["dark"], self.tiles["oov"]],
             default=tile_types.SHROUD,
         )
 
@@ -87,7 +91,8 @@ class GameMap:
             # Only print entities in the field of view.
             x, y = entity.x, entity.y
             if self.visible[x, y]:
-                console.print(x=x, y=y, string=entity.char, fg=entity.color)
+                fg = entity.color if not self.lit[x, y] else color.lit(entity.color)
+                console.print(x=x, y=y, string=entity.char, fg=fg)
 
 
 class GameWorld:

@@ -1,6 +1,8 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np  # type: ignore
+
+import color
 
 # Tile graphics structure type compatible with Console.tiles_rbg.
 graphic_dt = np.dtype(
@@ -17,7 +19,8 @@ tile_dt = np.dtype(
         ("walkable", np.bool),
         ("transparent", np.bool),
         ("dark", graphic_dt),
-        ("light", graphic_dt)
+        ("light", graphic_dt),
+        ("oov", graphic_dt),
     ]
 )
 
@@ -27,24 +30,30 @@ def new_tile(
         walkable: int,
         transparent: int,
         dark: Tuple[int, Tuple[int, int, int], Tuple[int, int, int]],
-        light: Tuple[int, Tuple[int, int, int], Tuple[int, int, int]],
+        light: Optional[Tuple[int, Tuple[int, int, int], Tuple[int, int, int]]] = None,
+        oov: Optional[Tuple[int, Tuple[int, int, int], Tuple[int, int, int]]] = None,
 ) -> np.ndarray:
     """Helper function for defining individual tile types."""
-    return np.array((walkable, transparent, dark, light), dtype=tile_dt)
+    if not light:
+        light = (dark[0], color.lit(dark[1]), color.lit(dark[2]))
+    if not oov:
+        oov = (dark[0], color.invisible(dark[1]), color.invisible(dark[2]))
+    return np.array((walkable, transparent, dark, light, oov), dtype=tile_dt)
 
 
 # SHROUD represents unexplored, unseen tiles
-SHROUD = np.array((ord(" "), (255, 255, 255), (0, 0, 0)), dtype=graphic_dt)
+SHROUD = np.array((ord(" "), (255, 255, 255), (32, 32, 0)), dtype=graphic_dt)
 
 floor = new_tile(
     walkable=True, transparent=True,
-    dark=(ord(" "), (255, 255, 255), (50, 50, 150)),
-    light=(ord(" "), (255, 255, 255), (200, 180, 50)))
+    dark=(ord(" "), (255, 255, 255), (65, 65, 70)))
+floor_oov_bg : Tuple[int, int, int] = tuple(floor["oov"]["bg"])
+
 wall = new_tile(
     walkable=False, transparent=False,
-    dark=(ord(" "), (255, 255, 255), (0, 0, 100)),
-    light=(ord(" "), (255, 255, 255), (130, 110, 50)))
+    dark=(ord(" "), (255, 255, 255), (80, 80, 100)))
+
 down_stairs = new_tile(
     walkable=True, transparent=True,
-    dark=(ord(">"), (0, 0, 100), (50, 50, 150)),
-    light=(ord(">"), (255, 255, 255), (200, 180, 50)))
+    dark=(ord(">"), (75, 150, 75), (65, 65, 70)),
+    oov=(ord(">"), (75, 150, 75), floor_oov_bg))
