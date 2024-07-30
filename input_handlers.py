@@ -313,39 +313,66 @@ class CharacterScreenEventHandler(AskUserEventHandler):
         else:
             x = 1
 
-        y = 1
-
         width = len(self.TITLE) + 4
+        off = 1
 
         console.draw_frame(
             x=x,
-            y=y,
+            y=off,
             width=width,
-            height=7,
+            height=10,
             title=self.TITLE,
             clear=True,
             fg=(255, 255, 255),
             bg=(0, 0, 0),
         )
+        off += 1
 
         console.print(
-            x=x + 1, y=y + 1, string=f"Level: {self.engine.player.level.current_level}"
+            x=x + 1, y=off, string=f"Level: {self.engine.player.level.current_level}"
         )
+        off += 1
         console.print(
-            x=x + 1, y=y + 2, string=f"XP: {self.engine.player.level.current_xp}"
+            x=x + 1, y=off, string=f"XP: {self.engine.player.level.current_xp}"
         )
+        off += 1
         console.print(
             x=x + 1,
-            y=y + 3,
+            y=off,
             string=f"XP for next Level: {self.engine.player.level.experience_to_next_level}",
         )
+        off += 1
 
         console.print(
-            x=x + 1, y=y + 4, string=f"Attack: {self.engine.player.fighter.power}"
+            x=x + 1, y=off, string=f"STR: {self.engine.player.attributes.strength:>2}"
         )
         console.print(
-            x=x + 1, y=y + 5, string=f"Defense: {self.engine.player.fighter.defense}"
+            x=x + 11, y=off, string=f"INT: {self.engine.player.attributes.intelligence:>2}"
         )
+        off += 1
+        console.print(
+            x=x + 1, y=off, string=f"DEX: {self.engine.player.attributes.dexterity:>2}"
+        )
+        console.print(
+            x=x + 11, y=off, string=f"WIS: {self.engine.player.attributes.wisdom:>2}"
+        )
+        off += 1
+        console.print(
+            x=x + 1, y=off, string=f"CON: {self.engine.player.attributes.constitution:>2}"
+        )
+        console.print(
+            x=x + 11, y=off, string=f"CHR: {self.engine.player.attributes.charisma:>2}"
+        )
+        off += 1
+
+        console.print(
+            x=x + 1, y=off, string=f"Attack: {self.engine.player.fighter.power}"
+        )
+        off += 1
+        console.print(
+            x=x + 1, y=off, string=f"Defense: {self.engine.player.fighter.defense}"
+        )
+        off += 1
 
 
 class LevelUpEventHandler(AskUserEventHandler):
