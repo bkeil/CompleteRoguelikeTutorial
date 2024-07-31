@@ -58,7 +58,7 @@ def new_game() -> Engine:
     engine.update_fov()
 
     engine.message_log.add_message(
-        "Hello and welcome, adventurer, to Hargard!", color.welcome_text
+        "Hello and welcome, adventurer!", color.welcome_text
     )
     return engine
 

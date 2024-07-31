@@ -31,7 +31,7 @@ def main() -> None:
         screen_width,
         screen_height,
         tileset=tile_set,
-        title="Hard Times on Hargard"
+        title="Hard Times"
     ) as context:
         root_console = tcod.console.Console(screen_width, screen_height, order="F")
         try:
