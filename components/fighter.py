@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from attributes import Stat, STR, DEX, modifier
 import color
 from components.base_component import BaseComponent
 from render_order import RenderOrder
 
-from typing import TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -13,9 +14,10 @@ if TYPE_CHECKING:
 class Fighter(BaseComponent):
     parent: Actor
 
-    def __init__(self, hp: int, base_defense: int, base_power: int):
+    def __init__(self, hp: int, stats: Dict[Stat, int], base_defense: int, base_power: int):
         self.max_hp = hp
         self._hp = hp
+        self.stats = stats
         self.base_defense = base_defense
         self.base_power = base_power
 
@@ -39,11 +41,11 @@ class Fighter(BaseComponent):
 
     @property
     def defense_bonus(self) -> int:
-        return self.parent.equipment.defense_bonus if self.parent.equipment else 0
+        return modifier(self.stats[DEX]) + self.parent.equipment.defense_bonus
 
     @property
     def power_bonus(self) -> int:
-        return self.parent.equipment.power_bonus if self.parent.equipment else 0
+        return modifier(self.stats[STR]) + self.parent.equipment.power_bonus
 
     def heal(self, amount: int) -> int:
         if self.hp == self.max_hp:

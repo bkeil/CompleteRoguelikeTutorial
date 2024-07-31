@@ -14,6 +14,7 @@ from actions import (
     WaitAction
 )
 import color
+import attributes
 import exceptions
 
 if TYPE_CHECKING:
@@ -343,27 +344,14 @@ class CharacterScreenEventHandler(AskUserEventHandler):
         )
         off += 1
 
-        console.print(
-            x=x + 1, y=off, string=f"STR: {self.engine.player.attributes.strength:>2}"
-        )
-        console.print(
-            x=x + 11, y=off, string=f"INT: {self.engine.player.attributes.intelligence:>2}"
-        )
-        off += 1
-        console.print(
-            x=x + 1, y=off, string=f"DEX: {self.engine.player.attributes.dexterity:>2}"
-        )
-        console.print(
-            x=x + 11, y=off, string=f"WIS: {self.engine.player.attributes.wisdom:>2}"
-        )
-        off += 1
-        console.print(
-            x=x + 1, y=off, string=f"CON: {self.engine.player.attributes.constitution:>2}"
-        )
-        console.print(
-            x=x + 11, y=off, string=f"CHR: {self.engine.player.attributes.charisma:>2}"
-        )
-        off += 1
+        for physical, mental in zip(attributes.PHYSICAL, attributes.MENTAL):
+            console.print(
+                x=x + 1, y=off, string=f"{physical.nick}: {self.engine.player.fighter.stats[physical]:>2}"
+            )
+            console.print(
+                x=x + 11, y=off, string=f"{mental.nick}: {self.engine.player.fighter.stats[mental]:>2}"
+            )
+            off += 1
 
         console.print(
             x=x + 1, y=off, string=f"Attack: {self.engine.player.fighter.power}"
