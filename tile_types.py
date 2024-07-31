@@ -46,7 +46,7 @@ SHROUD = np.array((ord(" "), (255, 255, 255), (32, 32, 0)), dtype=graphic_dt)
 
 floor = new_tile(
     walkable=True, transparent=True,
-    dark=(ord("."), (70, 70, 76), (65, 65, 70)))
+    dark=(ord("."), (75, 75, 82), (65, 65, 70)))
 floor_oov_bg: Tuple[int, int, int] = tuple(floor["oov"]["bg"])
 
 water = new_tile(
@@ -56,12 +56,16 @@ beach = new_tile(
     walkable=True, transparent=True,
     dark=(ord("~"), (160, 160, 190), (190, 190, 65))
 )
+grassland = new_tile(
+    walkable=True, transparent=True,
+    dark=(ord(","), (48, 130, 48), (24, 95, 24))
+)
 forest = new_tile(
     walkable=True, transparent=False,
     dark=(9827, (65, 130, 65), (16, 65, 16)))
 desert = new_tile(
     walkable=True, transparent=True,
-    dark=(ord("~"), (160,160,140), (180,180,140))
+    dark=(ord("~"), (180, 160, 80), (200, 180, 100))
 )
 
 wall = new_tile(
@@ -70,5 +74,5 @@ wall = new_tile(
 
 down_stairs = new_tile(
     walkable=True, transparent=True,
-    dark=(ord(">"), (75, 150, 75), (65, 65, 70)),
-    oov=(ord(">"), (75, 150, 75), floor_oov_bg))
+    dark=(ord(">"), (75, 225, 75), (65, 65, 70)),
+    oov=(ord(">"), (75, 225, 75), floor_oov_bg))

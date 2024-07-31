@@ -180,13 +180,15 @@ def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BS
 
 
 def terrain(e: floating) -> ndarray:
-    if e < 0.2:
+    if e < 0.225:
         return tile_types.water
-    elif e < 0.4:
+    elif e < 0.35:
         return tile_types.beach
-    elif e < 0.6:
+    elif e < 0.5:
+        return tile_types.grassland
+    elif e < 0.65:
         return tile_types.forest
-    elif e < 0.8:
+    elif e < 0.85:
         return tile_types.desert
     else:
         return tile_types.floor
@@ -221,13 +223,6 @@ def generate_dungeon(
         max_horizontal_ratio=2,
         max_vertical_ratio=2,
     )
-
-    noise = tcod.noise.Noise(
-        dimensions=2,
-        algorithm=tcod.noise.Algorithm.SIMPLEX,
-        seed=42 + engine.game_world.current_floor,
-    )
-    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=0.125, origin=(0, 0))] + 1.0) * 0.5
 
     node_rooms = {}
     for node in bsp.inverted_level_order():
@@ -267,7 +262,7 @@ def generate_overland(
         algorithm=tcod.noise.Algorithm.SIMPLEX,
         seed=42 + engine.game_world.current_floor,
     )
-    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=0.125, origin=(0, 0))] + 1.0) * 0.5
+    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=0.03125, origin=(0, 0))] + 1.0) * 0.5
 
     for y in range(map_height):
         for x in range(map_width):
