@@ -51,13 +51,16 @@ class Engine:
         self.game_map.visible[:] = compute_fov(
             self.game_map.tiles["transparent"],
             (self.player.x, self.player.y),
-            radius=8,
+            radius=12,
         )
-        self.game_map.lit[:] = compute_fov(
-            self.game_map.tiles["transparent"],
-            (self.player.x, self.player.y),
-            radius=3,
-        )
+        if self.game_world.current_floor > 0:
+            self.game_map.lit[:] = compute_fov(
+                self.game_map.tiles["transparent"],
+                (self.player.x, self.player.y),
+                radius=2,
+            )
+        else:
+            self.game_map.lit[:] = False
 
         self.game_map.explored |= self.game_map.visible
 

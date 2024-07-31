@@ -136,3 +136,11 @@ class GameWorld:
             map_height=self.map_height,
             engine=self.engine,
         )
+
+    def generate_overland(self) -> None:
+        from procgen import generate_overland
+        self.engine.game_map = generate_overland(
+            map_width=self.map_width,
+            map_height=self.map_height,
+            engine=self.engine,
+        )

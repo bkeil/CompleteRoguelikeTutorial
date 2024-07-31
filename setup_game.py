@@ -54,7 +54,7 @@ def new_game() -> Engine:
         engine=engine,
     )
 
-    engine.game_world.generate_floor()
+    engine.game_world.generate_overland()
     engine.update_fov()
 
     engine.message_log.add_message(

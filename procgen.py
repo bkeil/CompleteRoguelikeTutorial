@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import random
-from typing import Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 import tcod
+from numpy import dtype, floating, ndarray
 
 from entity import Actor
 import entity_types
@@ -178,6 +179,19 @@ def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BS
     node_rooms[node] = new_room
 
 
+def terrain(e: floating) -> ndarray:
+    if e < 0.2:
+        return tile_types.water
+    elif e < 0.4:
+        return tile_types.beach
+    elif e < 0.6:
+        return tile_types.forest
+    elif e < 0.8:
+        return tile_types.desert
+    else:
+        return tile_types.floor
+
+
 def connect_nodes(dungeon: GameMap, nodes: Tuple[tcod.bsp.BSP, tcod.bsp.BSP],
                      node_rooms: Dict[tcod.bsp.BSP, RectangularRoom]) -> None:
     # print('Connect the nodes:\n%s\n%s' % nodes)
@@ -201,12 +215,19 @@ def generate_dungeon(
 
     bsp = tcod.bsp.BSP(x=0, y=0, width=dungeon.width, height=dungeon.height)
     bsp.split_recursive(
-        depth=7,
+        depth=4,
         min_width=8,
         min_height=8,
         max_horizontal_ratio=2,
         max_vertical_ratio=2,
     )
+
+    noise = tcod.noise.Noise(
+        dimensions=2,
+        algorithm=tcod.noise.Algorithm.SIMPLEX,
+        seed=42 + engine.game_world.current_floor,
+    )
+    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=0.125, origin=(0, 0))] + 1.0) * 0.5
 
     node_rooms = {}
     for node in bsp.inverted_level_order():
@@ -229,5 +250,36 @@ def generate_dungeon(
     player.place(*rooms[0].center, dungeon)
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
     dungeon.downstairs_location = rooms[-1].center
+
+    return dungeon
+
+
+def generate_overland(
+        map_width: int,
+        map_height: int,
+        engine: Engine,
+) -> GameMap:
+    player = engine.player
+    dungeon = GameMap(engine, map_width, map_height, entities=[player])
+
+    noise = tcod.noise.Noise(
+        dimensions=2,
+        algorithm=tcod.noise.Algorithm.SIMPLEX,
+        seed=42 + engine.game_world.current_floor,
+    )
+    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=0.125, origin=(0, 0))] + 1.0) * 0.5
+
+    for y in range(map_height):
+        for x in range(map_width):
+            dungeon.tiles[x, y] = terrain(samples[x, y])
+
+    px = random.randint(1, map_width - 2)
+    py = random.randint(1, map_height - 2)
+    player.place(px, py, dungeon)
+
+    sx = random.randint(1, map_width - 2)
+    sy = random.randint(1, map_height - 2)
+    dungeon.tiles[sx, sy] = tile_types.down_stairs
+    dungeon.downstairs_location = (sx, sy)
 
     return dungeon
