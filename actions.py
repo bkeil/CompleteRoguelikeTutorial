@@ -4,6 +4,7 @@ from typing import Optional, Tuple, TYPE_CHECKING
 
 import color
 import exceptions
+import tile_types
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -112,7 +113,7 @@ class TakeStairsAction(Action):
         """
         Take the stairs, if any exist at the entity's location.
         """
-        if (self.entity.x, self.entity.y) == self.engine.game_map.downstairs_location:
+        if (self.game_map.tiles[self.entity.x, self.entity.y]) == tile_types.down_stairs:
             self.engine.game_world.generate_floor()
             self.engine.message_log.add_message(
                 "You descend the staircase.", color.descend

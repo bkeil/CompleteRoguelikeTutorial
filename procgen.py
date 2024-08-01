@@ -244,7 +244,6 @@ def generate_dungeon(
     random.shuffle(rooms)
     player.place(*rooms[0].center, dungeon)
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
-    dungeon.downstairs_location = rooms[-1].center
 
     return dungeon
 
@@ -275,6 +274,5 @@ def generate_overland(
     sx = random.randint(1, map_width - 2)
     sy = random.randint(1, map_height - 2)
     dungeon.tiles[sx, sy] = tile_types.down_stairs
-    dungeon.downstairs_location = (sx, sy)
 
     return dungeon
