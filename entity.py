@@ -88,6 +88,8 @@ class Entity:
 
 
 class Actor(Entity):
+    clairvoyant: bool = False
+
     def __init__(
             self,
             *,

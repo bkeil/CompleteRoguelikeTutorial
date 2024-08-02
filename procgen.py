@@ -190,8 +190,10 @@ def terrain(e: floating) -> ndarray:
         return tile_types.forest
     elif e < 0.85:
         return tile_types.desert
-    else:
+    elif e < 0.93:
         return tile_types.floor
+    else:
+        return tile_types.down_stairs
 
 
 def connect_nodes(dungeon: GameMap, nodes: Tuple[tcod.bsp.BSP, tcod.bsp.BSP],
@@ -252,6 +254,8 @@ def generate_overland(
         map_width: int,
         map_height: int,
         engine: Engine,
+        offset: tuple[int, int],
+        scale: float,
 ) -> GameMap:
     player = engine.player
     dungeon = GameMap(engine, map_width, map_height, entities=[player])
@@ -261,7 +265,7 @@ def generate_overland(
         algorithm=tcod.noise.Algorithm.SIMPLEX,
         seed=42 + engine.game_world.current_floor,
     )
-    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=0.03125, origin=(0, 0))] + 1.0) * 0.5
+    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=scale, origin=offset)] + 1.0) * 0.5
 
     for y in range(map_height):
         for x in range(map_width):
@@ -270,9 +274,5 @@ def generate_overland(
     px = random.randint(1, map_width - 2)
     py = random.randint(1, map_height - 2)
     player.place(px, py, dungeon)
-
-    sx = random.randint(1, map_width - 2)
-    sy = random.randint(1, map_height - 2)
-    dungeon.tiles[sx, sy] = tile_types.down_stairs
 
     return dungeon

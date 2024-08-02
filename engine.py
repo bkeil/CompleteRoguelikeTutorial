@@ -48,19 +48,23 @@ class Engine:
 
     def update_fov(self) -> None:
         """Recompute the visible area based on the players point of view."""
-        self.game_map.visible[:] = compute_fov(
-            self.game_map.tiles["transparent"],
-            (self.player.x, self.player.y),
-            radius=12,
-        )
-        if self.game_world.current_floor > 0:
-            self.game_map.lit[:] = compute_fov(
+        if self.player.clairvoyant:
+            self.game_map.visible[:] = True
+            self.game_map.lit[:] = False
+        else:
+            self.game_map.visible[:] = compute_fov(
                 self.game_map.tiles["transparent"],
                 (self.player.x, self.player.y),
-                radius=2,
+                radius=12,
             )
-        else:
-            self.game_map.lit[:] = False
+            if self.game_world.current_floor > 0:
+                self.game_map.lit[:] = compute_fov(
+                    self.game_map.tiles["transparent"],
+                    (self.player.x, self.player.y),
+                    radius=2,
+                )
+            else:
+                self.game_map.lit[:] = False
 
         self.game_map.explored |= self.game_map.visible
 
