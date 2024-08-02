@@ -1,11 +1,9 @@
 import copy
 import exceptions
 import traceback
-from typing import Optional
 
 import tcod
 
-from actions import Action
 import color
 from engine import Engine
 import entity_types
@@ -19,14 +17,20 @@ def explore_world() -> MainGameEventHandler:
     map_width = 80
     map_height = 43
 
+    room_max_size = 10
+    room_min_size = 6
+    max_rooms = 30
+
     player = copy.deepcopy(entity_types.player)
     player.clairvoyant = True
+    player.fighter.base_power = 20
+    player.fighter.base_defense = 20
 
     engine = Engine(player=player)
     engine.game_world = GameWorld(
-        max_rooms=1,
-        room_min_size=3,
-        room_max_size=3,
+        max_rooms=max_rooms,
+        room_min_size=room_max_size,
+        room_max_size=room_min_size,
         map_width=map_width,
         map_height=map_height,
         engine=engine,
@@ -83,7 +87,7 @@ if __name__ == "__main__":
 
     world_explorer = explore_world()
     handler: input_handlers.BaseEventHandler = world_explorer
-    engine = world_explorer.engine
+    eng = world_explorer.engine
 
     with tcod.context.new_terminal(
             screen_width,
@@ -96,17 +100,17 @@ if __name__ == "__main__":
             while True:
                 root_console.clear()
                 handler.on_render(console=root_console)
-                oy, ox = engine.game_world.offset
-                px, py = engine.player.x, engine.player.y
-                ax = ox + engine.game_world.scale * px
-                ay = oy + engine.game_world.scale * py
+                oy, ox = eng.game_world.offset
+                px, py = eng.player.x, eng.player.y
+                ax = ox + eng.game_world.scale * px
+                ay = oy + eng.game_world.scale * py
                 root_console.print(x=0, y=44, string=f"({ax}, {ay})")
                 context.present(root_console)
 
                 try:
                     for event in tcod.event.wait():
                         handler = handler.handle_event(context.convert_event(event))
-                    handle_exploration(engine)
+                    handle_exploration(eng)
                 except Exception:  # Handle exceptions in game.
                     traceback.print_exc()  # Print error to stderr.
                     # Then print the error to the message log.

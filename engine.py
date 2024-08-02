@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import lzma
+import math
 import pickle
 from typing import TYPE_CHECKING
 
@@ -32,6 +33,13 @@ class Engine:
                     entity.ai.perform()
                 except exceptions.Impossible:
                     pass  # Ignore impossible action exceptions from AI.
+
+    @property
+    def player_world_location(self) -> tuple[float, float]:
+        oy, ox = self.game_world.offset
+        py, px = self.player.y, self.player.x
+        scale = self.game_world.scale
+        return ox + px * scale, oy + py * scale
 
     def render(self, console: Console):
         self.game_map.render(console)

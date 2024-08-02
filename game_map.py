@@ -97,19 +97,20 @@ class GameWorld:
     """
     Holds the settings for the GameMap, and generates new maps when moving down the stairs.
     """
-    offset = (-1, -1)
+    offset = (3, 1)
     scale = .03125
+    seed = 42
 
     def __init__(
-        self,
-        *,
-        engine: Engine,
-        map_width: int,
-        map_height: int,
-        max_rooms: int,
-        room_min_size: int,
-        room_max_size: int,
-        current_floor: int = 0
+            self,
+            *,
+            engine: Engine,
+            map_width: int,
+            map_height: int,
+            max_rooms: int,
+            room_min_size: int,
+            room_max_size: int,
+            current_floor: int = 0
     ):
         self.engine = engine
 
@@ -127,6 +128,13 @@ class GameWorld:
         from procgen import generate_dungeon
 
         self.current_floor += 1
+        pwx, pwy = self.engine.player_world_location
+        seed = (
+                self.engine.game_world.seed
+                + self.current_floor * 83
+                + int(pwx) * 89
+                + int(pwy) * 97
+        )
 
         self.engine.game_map = generate_dungeon(
             max_rooms=self.max_rooms,
@@ -135,6 +143,7 @@ class GameWorld:
             map_width=self.map_width,
             map_height=self.map_height,
             engine=self.engine,
+            seed=seed,
         )
 
     def generate_overland(self) -> None:
