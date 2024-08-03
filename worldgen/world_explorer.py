@@ -45,40 +45,6 @@ def explore_world() -> MainGameEventHandler:
     return MainGameEventHandler(engine)
 
 
-def handle_exploration(engine: Engine, ) -> None:
-    px = engine.player.x
-    py = engine.player.y
-    dox, doy = 0, 0
-    move = False
-    if px == 0:
-        dox = -5 * engine.game_world.scale
-        px = 5
-        move = True
-    elif px == engine.game_map.width - 1:
-        dox = 5 * engine.game_world.scale
-        px -= 5
-        move = True
-
-    if py == 0:
-        doy = -5 * engine.game_world.scale
-        py = 5
-        move = True
-    elif py == engine.game_map.height - 1:
-        doy = 5 * engine.game_world.scale
-        py -= 5
-        move = True
-
-    if move:
-        oy, ox = engine.game_world.offset
-        ox += dox
-        oy += doy
-        engine.game_world.offset = (oy, ox)
-        engine.game_world.generate_overland()
-        engine.update_fov()
-        engine.player.x = px
-        engine.player.y = py
-
-
 if __name__ == "__main__":
     screen_width = 80
     screen_height = 50
@@ -110,7 +76,7 @@ if __name__ == "__main__":
                 try:
                     for event in tcod.event.wait():
                         handler = handler.handle_event(context.convert_event(event))
-                    handle_exploration(eng)
+                    eng.handle_exploration()
                 except Exception:  # Handle exceptions in game.
                     traceback.print_exc()  # Print error to stderr.
                     # Then print the error to the message log.

@@ -81,3 +81,50 @@ class Engine:
         save_data = lzma.compress(pickle.dumps(self))
         with open(filename, "wb") as f:
             f.write(save_data)
+
+    def handle_exploration(self) -> None:
+        px = self.player.x
+        py = self.player.y
+        shift = 5
+        dox, doy = 0, 0
+        move = False
+        isx = osx = slice(0, self.game_map.width)
+        isy = osy = slice(0, self.game_map.height)
+
+        if px == 0:
+            dox = -shift * self.game_world.scale
+            px = shift
+            move = True
+            osx = slice(shift, self.game_map.width)
+            isx = slice(0, self.game_map.width - shift)
+        elif px == self.game_map.width - 1:
+            dox = shift * self.game_world.scale
+            px -= shift
+            move = True
+            osx = slice(0, self.game_map.width - shift)
+            isx = slice(shift, self.game_map.width)
+
+        if py == 0:
+            doy = -shift * self.game_world.scale
+            py = shift
+            move = True
+            osy = slice(shift, self.game_map.height)
+            isy = slice(0, self.game_map.height - shift)
+        elif py == self.game_map.height - 1:
+            doy = shift * self.game_world.scale
+            py -= shift
+            move = True
+            osy = slice(0, self.game_map.height - shift)
+            isy = slice(shift, self.game_map.height)
+
+        if move:
+            oy, ox = self.game_world.offset
+            ox += dox
+            oy += doy
+            explored = self.game_map.explored[isx, isy]
+            self.game_world.offset = (oy, ox)
+            self.game_world.generate_overland()
+            self.game_map.explored[osx, osy] = explored
+            self.player.x = px
+            self.player.y = py
+            self.update_fov()
