@@ -12,33 +12,35 @@ if TYPE_CHECKING:
 class Equipment(BaseComponent):
     parent: Actor
 
-    def __init__(self, weapon: Optional[Item] = None, armor: Optional[Item] = None):
+    def __init__(self, weapon: Optional[Item] = None, armor: Optional[Item] = None, shield: Optional[Item] = None):
         self.weapon = weapon
         self.armor = armor
+        self.shield = shield
 
     @property
-    def defense_bonus(self) -> int:
-        bonus = 0
-
-        if self.weapon is not None and self.weapon.equippable is not None:
-            bonus += self.weapon.equippable.defense_bonus
+    def ac(self) -> int:
+        ac = 10
 
         if self.armor is not None and self.armor.equippable is not None:
-            bonus += self.armor.equippable.defense_bonus
+            if self.armor.equippable.ac > ac:
+                ac = self.armor.equippable.ac
 
-        return bonus
+        if self.shield is not None and self.shield.equippable is not None:
+            if self.shield.equippable.ac > ac:
+                ac = self.shield.equippable.ac
+            else:
+                ac += 1
+
+        return ac
 
     @property
-    def power_bonus(self) -> int:
-        bonus = 0
+    def damage(self) -> tuple[int, int]:
+        dmg = (1, 2)
 
         if self.weapon is not None and self.weapon.equippable is not None:
-            bonus += self.weapon.equippable.power_bonus
+            dmg = self.weapon.equippable.damage
 
-        if self.armor is not None and self.armor.equippable is not None:
-            bonus += self.armor.equippable.power_bonus
-
-        return bonus
+        return dmg
 
     def item_is_equipped(self, item: Item) -> bool:
         return self.weapon == item or self.armor == item
@@ -78,8 +80,13 @@ class Equipment(BaseComponent):
             and equippable_item.equippable.equipment_type == EquipmentType.WEAPON
         ):
             slot = "weapon"
-        else:
+        elif (
+            equippable_item.equippable
+            and equippable_item.equippable.equipment_type == EquipmentType.ARMOR
+        ):
             slot = "armor"
+        else:
+            slot = "shield"
 
         if getattr(self, slot) == equippable_item:
             self.unequip_from_slot(slot, add_message)

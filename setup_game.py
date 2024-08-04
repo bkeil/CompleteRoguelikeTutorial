@@ -32,16 +32,16 @@ def new_game(screen_width: int, screen_height: int) -> Engine:
 
     player = copy.deepcopy(entity_types.player)
     dagger = copy.deepcopy(entity_types.dagger)
-    leather_armor = copy.deepcopy(entity_types.leather_armor)
+    war_shirt = copy.deepcopy(entity_types.war_shirt)
 
     dagger.parent = player.inventory
-    leather_armor.parent = player.inventory
+    war_shirt.parent = player.inventory
 
     player.inventory.items.append(dagger)
     player.equipment.toggle_equip(dagger, add_message=False)
 
-    player.inventory.items.append(leather_armor)
-    player.equipment.toggle_equip(leather_armor, add_message=False)
+    player.inventory.items.append(war_shirt)
+    player.equipment.toggle_equip(war_shirt, add_message=False)
 
     engine = Engine(player=player)
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import attributes
 from components.base_component import BaseComponent
 
 if TYPE_CHECKING:
@@ -62,7 +63,7 @@ class Level(BaseComponent):
         self.increase_level()
 
     def increase_power(self, amount: int = 1) -> None:
-        self.parent.fighter.base_power += amount
+        self.parent.fighter.stats[attributes.STR] += amount
 
         if self.parent and self.parent is self.engine.player:
             self.engine.message_log.add_message("You feel stronger!")
@@ -70,9 +71,9 @@ class Level(BaseComponent):
         self.increase_level()
 
     def increase_defense(self, amount: int = 1) -> None:
-        self.parent.fighter.base_defense += amount
+        self.parent.fighter.stats[attributes.DEX] += amount
 
         if self.parent and self.parent is self.engine.player:
-            self.engine.message_log.add_message("Your skin is getting thicker!")
+            self.engine.message_log.add_message("Your reflexes are getting faster!")
 
         self.increase_level()

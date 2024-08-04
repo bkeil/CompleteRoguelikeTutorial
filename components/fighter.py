@@ -14,12 +14,13 @@ if TYPE_CHECKING:
 class Fighter(BaseComponent):
     parent: Actor
 
-    def __init__(self, hp: int, stats: Dict[Stat, int], base_defense: int, base_power: int):
+    def __init__(self, hp: int, stats: Dict[Stat, int], base_ac: int = 10,
+                 base_damage: tuple[int, int, int] = (1, 2, 0)):
         self.max_hp = hp
         self._hp = hp
         self.stats = stats
-        self.base_defense = base_defense
-        self.base_power = base_power
+        self.base_ac = base_ac
+        self.base_damage = base_damage
 
     @property
     def hp(self) -> int:
@@ -32,20 +33,33 @@ class Fighter(BaseComponent):
             self.die()
 
     @property
-    def defense(self) -> int:
-        return self.base_defense + self.defense_bonus
+    def ac(self) -> int:
+        eq = self.parent.equipment
+        ac = self.base_ac
+        if eq.armor is not None:
+            ac = max(ac, eq.armor.equippable.ac)
+        if eq.shield is not None:
+            if eq.shield.equippable.ac > ac:
+                ac = eq.shield.equippable.ac
+            else:
+                ac += 1
+
+        return ac + self.defense_bonus
 
     @property
-    def power(self) -> int:
-        return self.base_power + self.power_bonus
+    def power(self) -> tuple[int, int, int]:
+        sides, dice, bonus = self.base_damage
+        if self.parent.equipment.weapon is not None:
+            sides, dice, bonus = self.parent.equipment.weapon.equippable.damage
+        return sides, dice, bonus + self.power_bonus
 
     @property
     def defense_bonus(self) -> int:
-        return modifier(self.stats[DEX]) + self.parent.equipment.defense_bonus
+        return modifier(self.stats[DEX])
 
     @property
     def power_bonus(self) -> int:
-        return modifier(self.stats[STR]) + self.parent.equipment.power_bonus
+        return max(modifier(self.stats[STR]), modifier(self.stats[DEX]))
 
     def heal(self, amount: int) -> int:
         if self.hp == self.max_hp:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional, Tuple, TYPE_CHECKING
 
 import color
+import dice
 import exceptions
 import tile_types
 
@@ -158,7 +159,13 @@ class MeleeAction(ActionWithDirection):
         if not target:
             raise exceptions.Impossible("Nothing to attack.")
 
-        damage = self.entity.fighter.power - target.fighter.defense
+        hit_roll = dice.roll(1, 20) + self.entity.fighter.power_bonus
+        if hit_roll < target.fighter.ac:
+            self.engine.message_log.add_message(f"{self.entity.name.capitalize()} misses {target.name}")
+            return
+
+        num_sides, num_dice, bonus = self.entity.fighter.power
+        damage = dice.roll(num_sides, num_dice) + bonus
 
         attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
         if self.entity is self.engine.player:

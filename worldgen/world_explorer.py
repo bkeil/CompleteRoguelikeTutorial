@@ -14,8 +14,8 @@ from input_handlers import MainGameEventHandler
 
 def explore_world() -> MainGameEventHandler:
     """Return a brand new game session as an Engine instance."""
-    map_width = 80
-    map_height = 43
+    map_width = 132
+    map_height = 73
 
     room_max_size = 10
     room_min_size = 6
@@ -23,8 +23,8 @@ def explore_world() -> MainGameEventHandler:
 
     player = copy.deepcopy(entity_types.player)
     player.clairvoyant = True
-    player.fighter.base_power = 20
-    player.fighter.base_defense = 20
+    player.fighter.base_damage = (20, 2, 20)
+    player.fighter.base_ac = 40
 
     engine = Engine(player=player)
     engine.game_world = GameWorld(
@@ -46,8 +46,8 @@ def explore_world() -> MainGameEventHandler:
 
 
 if __name__ == "__main__":
-    screen_width = 80
-    screen_height = 50
+    screen_width = 132
+    screen_height = 80
 
     tile_set = tcod.tileset.load_bdf("../data/14x14.bdf")
 

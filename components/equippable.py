@@ -13,32 +13,51 @@ class Equippable(BaseComponent):
     parent: Item
 
     def __init__(
-        self,
-        equipment_type: EquipmentType,
-        power_bonus: int = 0,
-        defense_bonus: int = 0,
+            self,
+            equipment_type: EquipmentType,
+            damage: tuple[int, int, int] = (1, 2, 0),
+            ac: int = 0,
     ):
         self.equipment_type = equipment_type
-
-        self.power_bonus = power_bonus
-        self.defense_bonus = defense_bonus
+        self.damage = damage
+        self.ac = ac
 
 
 class Dagger(Equippable):
     def __init__(self) -> None:
-        super().__init__(equipment_type=EquipmentType.WEAPON, power_bonus=2)
+        super().__init__(equipment_type=EquipmentType.WEAPON, damage=(1, 4, 0))
 
 
-class Sword(Equippable):
+class ShortSword(Equippable):
     def __init__(self) -> None:
-        super().__init__(equipment_type=EquipmentType.WEAPON, power_bonus=4)
+        super().__init__(equipment_type=EquipmentType.WEAPON, damage=(1, 6, 0))
 
 
-class LeatherArmor(Equippable):
+class LongSword(Equippable):
     def __init__(self) -> None:
-        super().__init__(equipment_type=EquipmentType.ARMOR, defense_bonus=1)
+        super().__init__(equipment_type=EquipmentType.WEAPON, damage=(1, 8, 0))
 
 
-class ChainMail(Equippable):
+class WarShirt(Equippable):
     def __init__(self) -> None:
-        super().__init__(equipment_type=EquipmentType.ARMOR, defense_bonus=3)
+        super().__init__(equipment_type=EquipmentType.ARMOR, ac=11)
+
+
+class WarRobe(Equippable):
+    def __init__(self) -> None:
+        super().__init__(equipment_type=EquipmentType.ARMOR, ac=14)
+
+
+class MailHauberk(Equippable):
+    def __init__(self) -> None:
+        super().__init__(equipment_type=EquipmentType.ARMOR, ac=16)
+
+
+class SmallShield(Equippable):
+    def __init__(self):
+        super().__init__(equipment_type=EquipmentType.SHIELD, ac=13)
+
+
+class LargeShield(Equippable):
+    def __init__(self):
+        super().__init__(equipment_type=EquipmentType.SHIELD, ac=14)
