@@ -16,8 +16,8 @@ def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
 
 
 def main() -> None:
-    screen_width = 80
-    screen_height = 50
+    screen_width = 132
+    screen_height = 80
 
     # tile_set = tcod.tileset.load_tilesheet(
     #     "data/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
@@ -25,7 +25,7 @@ def main() -> None:
 
     tile_set = tcod.tileset.load_bdf("data/14x14.bdf")
 
-    handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
+    handler: input_handlers.BaseEventHandler = setup_game.MainMenu(screen_width, screen_height)
 
     with tcod.context.new_terminal(
         screen_width,

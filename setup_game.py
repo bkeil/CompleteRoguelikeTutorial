@@ -21,10 +21,10 @@ import input_handlers
 background_image = tcod.image.load("data/menu_background.png")[:, :, :3]
 
 
-def new_game() -> Engine:
+def new_game(screen_width: int, screen_height: int) -> Engine:
     """Return a brand new game session as an Engine instance."""
-    map_width = 80
-    map_height = 43
+    map_width = screen_width
+    map_height = screen_height - 7
 
     room_max_size = 10
     room_min_size = 6
@@ -72,6 +72,9 @@ def load_game(filename: str) -> Engine:
 
 
 class MainMenu(input_handlers.BaseEventHandler):
+    def __init__(self, screen_width, screen_height):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
     """Handle the main menu rendering and input."""
 
     def on_render(self, console: tcod.Console) -> None:
@@ -121,6 +124,6 @@ class MainMenu(input_handlers.BaseEventHandler):
                 traceback.print_exc()  # Print to stderr.
                 return input_handlers.PopupMessage(self, f"Failed to load save:\n{exc}")
         elif event.sym == tcod.event.KeySym.n:
-            return input_handlers.MainGameEventHandler(new_game())
+            return input_handlers.MainGameEventHandler(new_game(self.screen_width, self.screen_height))
 
         return None
