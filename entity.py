@@ -8,7 +8,6 @@ from render_order import RenderOrder
 
 if TYPE_CHECKING:
     from components.ai import BaseAI
-    from components.attributes import Attributes, STR, DEX, CON, INT, WIS, CHR
     from components.consumable import Consumable
     from components.equipment import Equipment
     from components.equippable import Equippable
@@ -52,6 +51,10 @@ class Entity:
     @property
     def game_map(self) -> GameMap:
         return self.parent.game_map
+
+    @property
+    def description(self) -> str:
+        return self.name
 
     def spawn(self: T, game_map: GameMap, x: int, y: int) -> T:
         """Spawn a copy of this instance at the given location."""
@@ -132,6 +135,13 @@ class Actor(Entity):
     def is_alive(self) -> bool:
         """Returns True as long as this actor can perform actions."""
         return bool(self.ai)
+
+    @property
+    def description(self) -> str:
+        if not self.is_alive:
+            return self.name
+        d, s, b = self.fighter.damage
+        return f"{self.name} {self.fighter.hp}hp [{self.fighter.ac}] {d}d{s} ({self.fighter.hit_roll_modifier:+}, {b:+})"
 
 
 class Item(Entity):

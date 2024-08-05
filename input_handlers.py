@@ -354,7 +354,7 @@ class CharacterScreenEventHandler(AskUserEventHandler):
             off += 1
 
         console.print(
-            x=x + 1, y=off, string=f"Attack: {self.engine.player.fighter.power}"
+            x=x + 1, y=off, string=f"Attack: {self.engine.player.fighter.damage}"
         )
         off += 1
         console.print(

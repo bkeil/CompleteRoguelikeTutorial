@@ -159,29 +159,39 @@ class MeleeAction(ActionWithDirection):
         if not target:
             raise exceptions.Impossible("Nothing to attack.")
 
-        hit_roll = dice.roll(1, 20) + self.entity.fighter.power_bonus
-        if hit_roll < target.fighter.ac:
-            self.engine.message_log.add_message(f"{self.entity.name.capitalize()} misses {target.name}")
-            return
+        hit_roll = dice.roll(1, 20) + self.entity.fighter.hit_roll_modifier
 
-        num_sides, num_dice, bonus = self.entity.fighter.power
-        damage = dice.roll(num_sides, num_dice) + bonus
+        shock_damage = 0
+        damage = 0
+        hit = True
 
-        attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
+        if hit_roll == 1 or (hit_roll < target.fighter.ac and hit_roll != 20):
+            # Miss, but check for shock
+            if target.fighter.ac < self.entity.fighter.max_shock_ac:
+                attack_desc = f"{self.entity.name.capitalize()} scrapes {target.name}"
+                shock_damage = self.entity.fighter.shock_damage
+            else:
+                attack_desc = f"{self.entity.name.capitalize()} misses {target.name}"
+                hit = False
+        else:
+            attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
+            num_sides, num_dice, bonus = self.entity.fighter.damage
+            damage = dice.roll(num_sides, num_dice) + bonus
+
+        damage = max(shock_damage, damage)
+
         if self.entity is self.engine.player:
             attack_color = color.player_atk
         else:
             attack_color = color.enemy_atk
 
-        if damage > 0:
-            self.engine.message_log.add_message(
-                f"{attack_desc} for {damage} hit points.", attack_color
-            )
-            target.fighter.hp -= damage
-        else:
-            self.engine.message_log.add_message(
-                f"{attack_desc} but does no damage.", attack_color
-            )
+        if hit and damage == 0:
+            attack_desc = f"{attack_desc} but does no damage."
+        elif damage > 0:
+            attack_desc = f"{attack_desc} for {damage} hit points."
+
+        self.engine.message_log.add_message(attack_desc, attack_color)
+        target.fighter.take_damage(damage)
 
 
 class MovementAction(ActionWithDirection):

@@ -1,26 +1,41 @@
 from __future__ import annotations
 
-from attributes import Stat, STR, DEX, modifier
+from typing import Dict, List, Optional, TYPE_CHECKING
+
+import components.equippable
+from attributes import Stat, STR, DEX, best_modifier, modifier
 import color
 from components.base_component import BaseComponent
+from components.equippable import Equippable, EquipmentType
 from render_order import RenderOrder
-
-from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from entity import Actor
+    import abilities
+
+UNARMED = Equippable(equipment_type=EquipmentType.WEAPON)
 
 
 class Fighter(BaseComponent):
     parent: Actor
 
-    def __init__(self, hp: int, stats: Dict[Stat, int], base_ac: int = 10,
-                 base_damage: tuple[int, int, int] = (1, 2, 0)):
+    def __init__(self, hp: int,
+                 stats: Dict[Stat, int],
+                 base_ac: int = 10,
+                 base_damage: tuple[int, int, int] = (1, 2, 0),
+                 base_damage_bonus: int = 0,
+                 skills: tuple[tuple[str, int], ...] = (),
+                 ):
         self.max_hp = hp
         self._hp = hp
         self.stats = stats
         self.base_ac = base_ac
         self.base_damage = base_damage
+        self.base_damage_bonus = base_damage_bonus
+        self.skills: Dict[str, int] = {}
+        for skill, level in skills:
+            self.skills[skill] = level
+        self.abilities: List[abilities.Ability] = []
 
     @property
     def hp(self) -> int:
@@ -44,22 +59,57 @@ class Fighter(BaseComponent):
             else:
                 ac += 1
 
-        return ac + self.defense_bonus
+        return ac + self.ac_bonus
 
     @property
-    def power(self) -> tuple[int, int, int]:
-        sides, dice, bonus = self.base_damage
+    def weapon(self) -> components.equippable.Equippable:
+        if self.parent.equipment.weapon is not None and self.parent.equipment.weapon.equippable is not None:
+            return self.parent.equipment.weapon.equippable
+        return UNARMED
+
+    @property
+    def shield(self) -> Optional[components.equippable.Equippable]:
+        if self.parent.equipment.shield is not None:
+            return self.parent.equipment.shield.equippable
+        return None
+
+    @property
+    def weapon_modifier(self) -> int:
+        return best_modifier(map(lambda att: self.stats[att], self.weapon.attribute))
+
+    @property
+    def hit_roll_modifier(self) -> int:
+        mod = self.parent.level.actor_class.base_attack_bonus(self.parent)
+        if "stab" in self.skills:
+            mod += self.skills["stab"]
+        mod += self.weapon_modifier
+        return mod
+
+    @property
+    def max_shock_ac(self) -> int:
+        return self.weapon.shock.max_ac
+
+    @property
+    def damage(self) -> tuple[int, int, int]:
+        s, d, b = self.base_damage
         if self.parent.equipment.weapon is not None:
-            sides, dice, bonus = self.parent.equipment.weapon.equippable.damage
-        return sides, dice, bonus + self.power_bonus
+            s, d, b = self.parent.equipment.weapon.equippable.damage
+        return s, d, b + self.damage_bonus
 
     @property
-    def defense_bonus(self) -> int:
+    def shock_damage(self) -> int:
+        return self.weapon.shock.damage + self.damage_bonus
+
+    @property
+    def ac_bonus(self) -> int:
         return modifier(self.stats[DEX])
 
     @property
-    def power_bonus(self) -> int:
-        return max(modifier(self.stats[STR]), modifier(self.stats[DEX]))
+    def damage_bonus(self) -> int:
+        mod = self.base_damage_bonus + self.weapon_modifier
+        for ability in self.abilities:
+            mod += ability.damage_bonus(self.parent)
+        return mod
 
     def heal(self, amount: int) -> int:
         if self.hp == self.max_hp:

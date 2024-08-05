@@ -38,7 +38,7 @@ enemy_chances: Dict[int, List[Tuple[Entity, int]]] = {
     0: [(entity_types.goblin, 80)],
     3: [(entity_types.orc, 15)],
     5: [(entity_types.orc, 30)],
-    7: [(entity_types.troll, 60)],
+    7: [(entity_types.bugbear, 60)],
 }
 
 
@@ -152,12 +152,6 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,
         y = entity_gen.randint(room.y1 + 1, room.y2 - 1)
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
             entity = entity_type.spawn(dungeon, x, y)
-            if isinstance(entity, Actor):
-                for _ in range(floor_number - 1):
-                    if entity_gen.random() < 0.7:
-                        entity.level.increase_power(1)
-                    else:
-                        entity.level.increase_defense(1)
 
 
 def _next_seed(gen: random.Random) -> int:
@@ -167,11 +161,11 @@ def _next_seed(gen: random.Random) -> int:
 def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BSP, RectangularRoom],
               current_floor: int,
               gen: random.Random) -> None:
-    roomgen = random.Random(_next_seed(gen))
+    room_gen = random.Random(_next_seed(gen))
 
     # print('Dig a room for %s.' % node)
-    room_width = roomgen.randint(node.width // 2, node.width - 2)
-    room_height = roomgen.randint(node.height // 2, node.height - 2)
+    room_width = room_gen.randint(node.width // 2, node.width - 2)
+    room_height = room_gen.randint(node.height // 2, node.height - 2)
 
     x = node.x + (node.width - room_width) // 2
     y = node.y + (node.height - room_height) // 2
@@ -186,7 +180,7 @@ def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BS
     # Dig out this room's inner area.
     dungeon.tiles[new_room.inner] = tile_types.floor
 
-    place_entities(new_room, dungeon, current_floor, roomgen)
+    place_entities(new_room, dungeon, current_floor, room_gen)
 
     node_rooms[node] = new_room
 

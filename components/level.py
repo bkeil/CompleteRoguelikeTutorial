@@ -9,17 +9,39 @@ if TYPE_CHECKING:
     from entity import Actor
 
 
+class ActorClass:
+    def base_attack_bonus(self, actor: Actor) -> int:
+        return 0
+
+
+class Warrior(ActorClass):
+    def base_attack_bonus(self, actor: Actor):
+        return actor.level.current_level
+
+
+class Monster(ActorClass):
+    _base_attack_bonus: int
+
+    def __init__(self, base_attack_bonus: int):
+        self._base_attack_bonus = base_attack_bonus
+
+    def base_attack_bonus(self, actor: Actor) -> int:
+        return self._base_attack_bonus
+
+
 class Level(BaseComponent):
     parent: Actor
 
     def __init__(
             self,
+            actor_class: ActorClass,
             current_level: int = 1,
             current_xp: int = 0,
             level_up_base: int = 0,
             level_up_factor: int = 150,
             xp_given: int = 0,
     ):
+        self.actor_class = actor_class
         self.current_level = current_level
         self.current_xp = current_xp
         self.level_up_base = level_up_base

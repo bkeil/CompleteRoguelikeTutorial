@@ -2,6 +2,9 @@ import random
 
 
 def roll(num_dice: int, num_sides: int, advantage: int = 0) -> int:
+    if num_sides == 1:
+        return num_dice
+
     if advantage == 0:
         total = 0
         for die in range(num_dice):

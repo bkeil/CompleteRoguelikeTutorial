@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, TYPE_CHECKING
+from typing import Dict, Iterable, TYPE_CHECKING
 from dataclasses import dataclass
 
 import dice
@@ -31,10 +31,14 @@ def modifier(val: int) -> int:
         return -1
     elif val < 14:
         return 0
-    elif val < 17:
+    elif val < 18:
         return 1
     else:
         return 2
+
+
+def best_modifier(vals: Iterable[int]) -> int:
+    return max(map(modifier, vals))
 
 
 def roll() -> Dict[Stat, int]:

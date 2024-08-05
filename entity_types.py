@@ -1,12 +1,30 @@
+from __future__ import annotations
+
+import copy
+import dataclasses
+from typing import Sequence, Type, TYPE_CHECKING
+
 import attributes
 import color
+import dice
 from components.ai import HostileEnemy
 from components import consumable, equippable
 from components.equipment import Equipment
 from components.fighter import Fighter
 from components.inventory import Inventory
-from components.level import Level
+from components.level import Level, Monster, Warrior
 from entity import Actor, Item
+
+if TYPE_CHECKING:
+    from components.level import ActorClass
+    from components.ai import BaseAI
+    from game_map import GameMap
+
+
+class Spawner[T]:
+    def spawn(self, dungeon: GameMap, x: int, y: int):
+        raise NotImplementedError()
+
 
 player = Actor(
     char="@",
@@ -16,7 +34,7 @@ player = Actor(
     equipment=Equipment(),
     fighter=Fighter(hp=30, stats=attributes.roll(), base_ac=10),
     inventory=Inventory(capacity=26),
-    level=Level(level_up_base=200)
+    level=Level(actor_class=Warrior(), level_up_base=200)
 )
 
 _POTION = "!"
@@ -51,9 +69,11 @@ dagger = Item(
     char="|", color=(0, 191, 255), name="Dagger", equippable=equippable.Dagger()
 )
 
-short_sword = Item(char="/", color=color.steel, name="Short Sword", equippable=equippable.ShortSword())
+short_sword = Item(char="|", color=color.steel, name="Short Sword", equippable=equippable.ShortSword())
 
-long_sword = Item(char=chr(9876), color=color.steel, name="Long Sword", equippable=equippable.LongSword())
+long_sword = Item(char="|", color=color.steel, name="Long Sword", equippable=equippable.LongSword())
+
+war_axe = Item(char="/", color=(0x7E, 0x71, 0x71), name="War Axe", equippable=equippable.WarAxe())
 
 war_shirt = Item(
     char="(",
@@ -61,7 +81,12 @@ war_shirt = Item(
     name="War Shirt",
     equippable=equippable.WarShirt(),
 )
-
+padded_armor = Item(
+    char="(",
+    color=(128, 64, 255),
+    name="Padded Armor",
+    equippable=equippable.Linothorax(),
+)
 leather_armor = Item(
     char="[",
     color=color.leather,
@@ -87,33 +112,69 @@ large_shield = Item(
     equippable=equippable.LargeShield(),
 )
 
-goblin = Actor(
+
+@dataclasses.dataclass(frozen=True)
+class MobSpawner(Spawner):
+    char: str
+    color: tuple[int, int, int]
+    name: str
+    hit_dice: int
+    equipment: Sequence[Item] = ()
+    ai_cls: Type[BaseAI] = HostileEnemy
+    base_ac: int = 10
+    base_attack_bonus: int = 0
+    base_damage_bonus: int = 0
+    base_damage: tuple[int, int, int] = (1, 2, 0)
+    skills: tuple[tuple[str, int], ...] = ()
+
+    def spawn(self, dungeon: GameMap, x: int, y: int):
+        hp = dice.roll(self.hit_dice, 8)
+        mob = Actor(char=self.char, color=self.color, name=self.name, ai_cls=self.ai_cls, equipment=Equipment(),
+                    fighter=Fighter(hp=hp,
+                                    stats=attributes.typical(),
+                                    base_ac=self.base_ac,
+                                    base_damage_bonus=self.base_damage_bonus,
+                                    ),
+                    inventory=Inventory(capacity=len(self.equipment)),
+                    level=Level(actor_class=Monster(base_attack_bonus=self.base_attack_bonus),
+                                current_level=self.hit_dice, xp_given=self.hit_dice * 35))
+        for item in self.equipment:
+            gear = copy.deepcopy(item)
+            gear.parent = mob.inventory
+            mob.inventory.items.append(gear)
+            mob.equipment.toggle_equip(gear, add_message=False)
+        mob.x, mob.y = x, y
+        mob.parent = dungeon
+        dungeon.entities.add(mob)
+        return mob
+
+
+goblin = MobSpawner(
     char="g",
-    color=(95, 159, 95),
+    color=(125, 159, 95),
     name="Goblin",
-    ai_cls=HostileEnemy,
-    equipment=Equipment(),
-    fighter=Fighter(hp=5, stats=attributes.typical(), base_ac=13, base_damage=(1, 6, 1)),
-    inventory=Inventory(capacity=0),
-    level=Level(xp_given=35),
+    equipment=(short_sword, padded_armor),
+    hit_dice=1,
+    base_attack_bonus=1,
+    base_damage_bonus=1,
+    skills=(("stab", 0),)
 )
-orc = Actor(
+orc = MobSpawner(
     char="o",
     color=(63, 127, 63),
     name="Orc",
-    ai_cls=HostileEnemy,
-    equipment=Equipment(),
-    fighter=Fighter(hp=9, stats=attributes.typical(), base_ac=14, base_damage=(1, 10, 1)),
-    inventory=Inventory(capacity=0),
-    level=Level(xp_given=100),
+    equipment=(leather_armor, war_axe),
+    hit_dice=2,
+    base_attack_bonus=4,
+    base_damage_bonus=1,
+    skills=(("stab", 0),)
 )
-troll = Actor(
-    char="T",
+bugbear = MobSpawner(
+    char="G",
     color=(63, 127, 0),
-    name="Troll",
-    ai_cls=HostileEnemy,
-    equipment=Equipment(),
-    fighter=Fighter(hp=14, stats=attributes.typical(), base_ac=14, base_damage=(1, 10, 1)),
-    inventory=Inventory(capacity=0),
-    level=Level(xp_given=200),
+    name="Bugbear",
+    equipment=(leather_armor,),
+    hit_dice=3,
+    base_attack_bonus=5,
+    base_damage=(1, 10, 3),
 )

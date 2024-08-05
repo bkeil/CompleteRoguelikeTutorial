@@ -10,6 +10,8 @@ from typing import Optional
 import tcod
 from tcod import libtcodpy
 
+import abilities
+import attributes
 import color
 from engine import Engine
 import entity_types
@@ -31,6 +33,15 @@ def new_game(screen_width: int, screen_height: int) -> Engine:
     max_rooms = 30
 
     player = copy.deepcopy(entity_types.player)
+    player.fighter.skills["stab"] = 1
+    if player.fighter.stats[attributes.DEX] < 14:
+        player.fighter.stats[attributes.DEX] = 14
+    elif player.fighter.stats[attributes.STR] < 14:
+        player.fighter.stats[attributes.STR] = 14
+    elif player.fighter.stats[attributes.CON] < 14:
+        player.fighter.stats[attributes.CON] = 14
+    player.fighter.abilities.append(abilities.KillingBlow())
+
     dagger = copy.deepcopy(entity_types.dagger)
     war_shirt = copy.deepcopy(entity_types.war_shirt)
 
