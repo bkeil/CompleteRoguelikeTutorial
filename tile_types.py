@@ -49,9 +49,14 @@ floor = new_tile(
     dark=(ord("."), (75, 75, 82), (65, 65, 70)))
 floor_oov_bg: Tuple[int, int, int] = tuple(floor["oov"]["bg"])
 
-water = new_tile(
+deep_water = new_tile(
     walkable=True, transparent=True,
     dark=(8776, (65, 65, 130), (32, 32, 65)))
+shallow_water = new_tile(
+    walkable=True, transparent=True,
+    dark=(8776, (65, 95, 130), (32, 62, 65)))
+
+
 beach = new_tile(
     walkable=True, transparent=True,
     dark=(ord("~"), (160, 160, 190), (190, 190, 65))

@@ -97,9 +97,9 @@ class GameWorld:
     """
     Holds the settings for the GameMap, and generates new maps when moving down the stairs.
     """
-    offset = (3, 1)
+    offset = (1, 1)
     # scale = .03125
-    scale = 0.0625
+    scale = 1/pow(2,7)
     seed = 42
 
     def __init__(

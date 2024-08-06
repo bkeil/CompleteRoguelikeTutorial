@@ -70,7 +70,7 @@ if __name__ == "__main__":
                 px, py = eng.player.x, eng.player.y
                 ax = ox + eng.game_world.scale * px
                 ay = oy + eng.game_world.scale * py
-                root_console.print(x=0, y=44, string=f"({ax}, {ay})")
+                root_console.print(x=0, y=eng.game_map.height, string=f"({ax}, {ay})")
                 context.present(root_console)
 
                 try:

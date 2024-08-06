@@ -16,8 +16,9 @@ if TYPE_CHECKING:
     from entity import Entity
 
 max_items_by_floor = [
-    (1, 1),
-    (4, 2),
+    (1, 2),
+    (4, 3),
+    (6, 4),
 ]
 
 item_chances: Dict[int, List[Tuple[Entity, int]]] = {
@@ -186,8 +187,10 @@ def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BS
 
 
 def terrain(e: floating) -> ndarray:
+    if e < 0.105:
+        return tile_types.deep_water
     if e < 0.225:
-        return tile_types.water
+        return tile_types.shallow_water
     elif e < 0.35:
         return tile_types.beach
     elif e < 0.5:
@@ -275,10 +278,10 @@ def generate_overland(
     noise = tcod.noise.Noise(
         dimensions=2,
         algorithm=tcod.noise.Algorithm.SIMPLEX,
-        # implementation=tcod.noise.Implementation.TURBULENCE,
+        implementation=tcod.noise.Implementation.TURBULENCE,
         seed=gen.randint(0, 4294967295),
     )
-    samples = (noise[tcod.noise.grid(shape=(map_height, map_width), scale=scale, origin=offset)] + 1.0) * 0.5
+    samples = 1 - noise[tcod.noise.grid(shape=(map_height, map_width), scale=scale, origin=offset)]
 
     for y in range(map_height):
         for x in range(map_width):
