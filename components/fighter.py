@@ -132,6 +132,11 @@ class Fighter(BaseComponent):
             death_message = f"{self.parent.name} is dead!"
             death_message_color = color.enemy_die
             self.engine.player.level.add_xp(self.parent.level.xp_given)
+            for i in reversed(range(len(self.parent.inventory.items))):
+                item = self.parent.inventory.items[i]
+                if self.parent.equipment.item_is_equipped(item):
+                    self.parent.equipment.toggle_equip(item, add_message=False)
+                self.parent.inventory.drop(item)
 
         self.parent.char = '%'
         self.parent.blocks_movement = False
