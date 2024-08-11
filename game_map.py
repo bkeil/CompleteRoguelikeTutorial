@@ -128,7 +128,6 @@ class GameWorld:
     def generate_floor(self) -> None:
         from procgen import generate_dungeon
 
-        self.current_floor += 1
         pwx, pwy = self.engine.player_world_location
         seed = (
                 self.engine.game_world.seed

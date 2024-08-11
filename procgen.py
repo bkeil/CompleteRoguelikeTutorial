@@ -257,7 +257,8 @@ def generate_dungeon(
 
     rooms = list(node_rooms.values())
     gen.shuffle(rooms)
-    player.place(*rooms[0].center, dungeon)
+    player.place(*rooms[0].center, game_map=dungeon)
+    dungeon.tiles[player.x, player.y] = tile_types.up_stairs
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
 
     return dungeon

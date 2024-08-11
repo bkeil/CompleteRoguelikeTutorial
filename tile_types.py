@@ -81,3 +81,8 @@ down_stairs = new_tile(
     walkable=True, transparent=True,
     dark=(ord(">"), (75, 225, 75), (65, 65, 70)),
     oov=(ord(">"), (75, 225, 75), floor_oov_bg))
+
+up_stairs = new_tile(
+    walkable=True, transparent=True,
+    dark=(ord("<"), (75, 225, 75), (65, 65, 70)),
+    oov=(ord("<"), (75, 225, 75), floor_oov_bg))

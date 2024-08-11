@@ -186,9 +186,13 @@ class MainGameEventHandler(EventHandler):
         elif key == tcod.event.KeySym.ESCAPE:
             raise SystemExit()
         elif key == tcod.event.KeySym.PERIOD and modifier & (
-            tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
-        ):
-            return actions.TakeStairsAction(player)
+                    tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
+            ):
+            return actions.TakeStairsAction(player, down=True)
+        elif key == tcod.event.KeySym.COMMA and modifier & (
+                    tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT
+            ):
+            return actions.TakeStairsAction(player, down=False)
         elif key == tcod.event.KeySym.SLASH:
             return LookHandler(self.engine)
         elif key == tcod.event.KeySym.c:
