@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
+from dataclasses import dataclass
 from typing import Sequence, Type, TYPE_CHECKING
 
 import attributes
@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from components.level import ActorClass
     from components.ai import BaseAI
     from game_map import GameMap
+    from worldgen.people import Person
 
 
 class Spawner[T]:
@@ -113,7 +114,7 @@ large_shield = Item(
 )
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class MobSpawner(Spawner):
     char: str
     color: tuple[int, int, int]
@@ -178,3 +179,4 @@ bugbear = MobSpawner(
     base_attack_bonus=5,
     base_damage=(1, 10, 3),
 )
+

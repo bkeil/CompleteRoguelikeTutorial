@@ -6,10 +6,12 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 import tcod
 from numpy import dtype, floating, ndarray
 
+from components.ai import QuestGiver
 from entity import Actor
 import entity_types
 from game_map import GameMap
 import tile_types
+import worldgen.people
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -260,6 +262,18 @@ def generate_dungeon(
     player.place(*rooms[0].center, game_map=dungeon)
     dungeon.tiles[player.x, player.y] = tile_types.up_stairs
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
+
+    if engine.game_world.current_floor == 1:
+        person = worldgen.people.new_person(gen)
+        quest_giver = entity_types.MobSpawner(
+            char='p',
+            color=(230,255,230),
+            name=person.type.noun.capitalize(),
+            hit_dice=10,
+            ai_cls=QuestGiver,
+        ).spawn(dungeon, *rooms[-2].center)
+        quest_giver.person = person
+        person.parent = quest_giver
 
     return dungeon
 
