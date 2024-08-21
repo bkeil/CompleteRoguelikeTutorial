@@ -17,6 +17,10 @@ class BaseAI(Action):
     def perform(self) -> None:
         raise NotImplementedError()
 
+    @property
+    def is_quest_giver(self) -> bool:
+        return False
+
     def get_path_to(self, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
         """Compute and return a path to the target position.
 
@@ -51,6 +55,15 @@ class QuestGiver(BaseAI):
     def __init__(self, entity: Actor):
         super().__init__(entity)
         self.path: List[Tuple[int, int]] = []
+
+    def is_quest_giver(self) -> bool:
+        return True
+
+    @property
+    def quest_message(self) -> str:
+        p = self.entity.person
+        return (f"I am {p.type.article} {p.type.noun}.  I want to {p.motivation.summary}, so I need {p.need.summary}.  "
+                f"Can you help me?")
 
     def perform(self) -> None:
         target = self.engine.player

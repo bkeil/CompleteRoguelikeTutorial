@@ -16,7 +16,6 @@ from actions import (
 import color
 import attributes
 import exceptions
-import worldgen
 
 if TYPE_CHECKING:
     from engine import Engine

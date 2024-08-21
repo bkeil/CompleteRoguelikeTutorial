@@ -5,9 +5,11 @@ from typing import Optional, Tuple, TYPE_CHECKING
 import color
 import dice
 import exceptions
+import input_handlers
 import tile_types
 
 if TYPE_CHECKING:
+    import components.ai
     from engine import Engine
     from entity import Actor, Entity, Item
     from game_map import GameMap
@@ -161,9 +163,12 @@ class ActionWithDirection(Action):
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:
         if self.target_actor:
-            return MeleeAction(self.entity, self.dx, self.dy).perform()
+            if self.target_actor.ai.is_quest_giver:
+                self.target_actor.person.say(self.target_actor.ai.quest_message)
+            else:
+                MeleeAction(self.entity, self.dx, self.dy).perform()
         else:
-            return MovementAction(self.entity, self.dx, self.dy).perform()
+            MovementAction(self.entity, self.dx, self.dy).perform()
 
 
 class MeleeAction(ActionWithDirection):

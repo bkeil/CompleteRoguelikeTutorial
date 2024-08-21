@@ -1,6 +1,7 @@
 import random
 
 import worldgen.seed
+from worldgen import motivations, needs
 from components.person import Person, PersonType
 
 _TYPES = [
@@ -36,5 +37,7 @@ _TYPES = [
 
 def new_person(gen: random.Random) -> Person:
     person_gen = worldgen.seed.new_generator(gen)
-    return Person(type=person_gen.choice(_TYPES))
-
+    return Person(type=person_gen.choice(_TYPES),
+                  motivation=person_gen.choice(motivations.MOTIVATIONS),
+                  need=person_gen.choice(needs.NEEDS),
+                  )

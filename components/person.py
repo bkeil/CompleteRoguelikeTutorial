@@ -15,11 +15,23 @@ class PersonType:
     noun: str
 
 
+@dataclass(frozen=True)
+class Motivation:
+    summary: str
+
+
+@dataclass(frozen=True)
+class Need:
+    summary: str
+
+
 class Person(BaseComponent):
     parent: Actor
 
-    def __init__(self, type: PersonType):
+    def __init__(self, type: PersonType, motivation: Motivation, need: Need):
         self.type = type
+        self.motivation = motivation
+        self.need = need
 
     def say(self, message: str) -> None:
         self.engine.message_log.add_message(f"{self.type.article.capitalize()} {self.type.noun} says {message}.")
