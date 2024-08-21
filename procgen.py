@@ -7,11 +7,11 @@ import tcod
 from numpy import dtype, floating, ndarray
 
 from components.ai import QuestGiver
-from entity import Actor
 import entity_types
 from game_map import GameMap
 import tile_types
 import worldgen.people
+import worldgen.seed
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -135,7 +135,7 @@ def tunnel_between(
 
 def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,
                    gen: random.Random) -> None:
-    entity_gen = random.Random(_next_seed(gen))
+    entity_gen = worldgen.seed.new_generator(gen)
     number_of_monsters = entity_gen.randint(
         0, get_max_value_for_floor(max_monsters_by_floor, floor_number)
     )
@@ -157,14 +157,10 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,
             entity = entity_type.spawn(dungeon, x, y)
 
 
-def _next_seed(gen: random.Random) -> int:
-    return gen.randint(0, 4294967295)
-
-
 def make_room(dungeon: GameMap, node: tcod.bsp.BSP, node_rooms: Dict[tcod.bsp.BSP, RectangularRoom],
               current_floor: int,
               gen: random.Random) -> None:
-    room_gen = random.Random(_next_seed(gen))
+    room_gen = worldgen.seed.new_generator(gen)
 
     # print('Dig a room for %s.' % node)
     room_width = room_gen.randint(node.width // 2, node.width - 2)
@@ -294,7 +290,7 @@ def generate_overland(
         dimensions=2,
         algorithm=tcod.noise.Algorithm.SIMPLEX,
         implementation=tcod.noise.Implementation.TURBULENCE,
-        seed=gen.randint(0, 4294967295),
+        seed=worldgen.seed.rand_seed(gen),
     )
     samples = 1 - noise[tcod.noise.grid(shape=(map_height, map_width), scale=scale, origin=offset)]
 

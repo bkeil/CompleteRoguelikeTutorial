@@ -1,36 +1,38 @@
 import random
+
+import worldgen.seed
 from components.person import Person, PersonType
 
 _TYPES = [
-    PersonType('an', 'artisan'),
-    PersonType('a', 'travelling merchant'),
     PersonType('a', 'courier'),
-    PersonType('an', 'entertainer'),
     PersonType('a', 'criminal'),
-    PersonType('a', 'hunter'),
-    PersonType('a', 'farmhand'),
     PersonType('a', 'day worker'),
-    PersonType('a', 'peasant'),
-    PersonType('a', 'merchant'),
-    PersonType('a', 'petty noble'),
-    PersonType('a', 'nomad'),
-    PersonType('a', 'physician'),
+    PersonType('a', 'farmhand'),
     PersonType('a', 'healer'),
+    PersonType('a', 'hunter'),
+    PersonType('a', 'knight'),
+    PersonType('a', 'mercenary'),
+    PersonType('a', 'merchant'),
+    PersonType('a', 'nomad'),
+    PersonType('a', 'peasant'),
+    PersonType('a', 'petty noble'),
+    PersonType('a', 'physician'),
     PersonType('a', 'priest'),
     PersonType('a', 'sailor'),
-    PersonType('a', 'sea captain'),
     PersonType('a', 'scholar'),
+    PersonType('a', 'sea captain'),
     PersonType('a', 'slave'),
     PersonType('a', 'soldier'),
-    PersonType('a', 'mercenary'),
-    PersonType('a', 'knight'),
-    PersonType('a', 'scholar'),
-    PersonType('a', 'thug'),
     PersonType('a', 'strongman'),
-    PersonType('a', 'wanderer')
+    PersonType('a', 'thug'),
+    PersonType('a', 'travelling merchant'),
+    PersonType('a', 'wanderer'),
+    PersonType('an', 'artisan'),
+    PersonType('an', 'entertainer'),
 ]
 
 
 def new_person(gen: random.Random) -> Person:
-    return Person(type=gen.choice(_TYPES))
+    person_gen = worldgen.seed.new_generator(gen)
+    return Person(type=person_gen.choice(_TYPES))
 
