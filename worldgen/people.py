@@ -4,9 +4,11 @@ import worldgen.seed
 from components.person import Person, PersonType
 
 _TYPES = [
+    PersonType('a', 'bureaucrat'),
     PersonType('a', 'courier'),
     PersonType('a', 'criminal'),
     PersonType('a', 'day worker'),
+    PersonType('a', 'dilettante'),
     PersonType('a', 'farmhand'),
     PersonType('a', 'healer'),
     PersonType('a', 'hunter'),
