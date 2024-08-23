@@ -43,7 +43,7 @@ class Equipment(BaseComponent):
         return dmg
 
     def item_is_equipped(self, item: Item) -> bool:
-        return self.weapon == item or self.armor == item
+        return self.weapon == item or self.armor == item or self.shield == item
 
     def unequip_message(self, item_name: str) -> None:
         self.parent.game_map.engine.message_log.add_message(

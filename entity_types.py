@@ -134,6 +134,7 @@ class MobSpawner(Spawner):
                     fighter=Fighter(hp=hp,
                                     stats=attributes.typical(),
                                     base_ac=self.base_ac,
+                                    base_damage=self.base_damage,
                                     base_damage_bonus=self.base_damage_bonus,
                                     ),
                     inventory=Inventory(capacity=len(self.equipment)),
