@@ -260,11 +260,11 @@ def generate_dungeon(
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
 
     if engine.game_world.current_floor == 1:
-        person = worldgen.people.new_person(gen)
+        person = worldgen.people.new_headliner(gen)
         quest_giver = entity_types.MobSpawner(
             char='p',
             color=(230,255,230),
-            name=person.type.noun.capitalize(),
+            name=person.background.noun.capitalize(),
             hit_dice=10,
             ai_cls=QuestGiver,
         ).spawn(dungeon, *rooms[-2].center)

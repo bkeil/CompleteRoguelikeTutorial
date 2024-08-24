@@ -7,7 +7,6 @@ import numpy as np  # type: ignore
 import tcod
 
 from actions import Action, BumpAction, MeleeAction, MovementAction, WaitAction
-from components.base_component import BaseComponent
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -62,7 +61,8 @@ class QuestGiver(BaseAI):
     @property
     def quest_message(self) -> str:
         p = self.entity.person
-        return (f"I am {p.type.article} {p.type.noun}.  I want to {p.motivation.summary}, so I need {p.need.summary}.  "
+        return (f"I am {p.background.article} {p.background.noun}.  "
+                f"I want to {p.motivation.summary}, so I need {p.need.summary}.  "
                 f"Can you help me?")
 
     def perform(self) -> None:

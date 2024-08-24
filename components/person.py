@@ -21,13 +21,7 @@ class Motivation:
     summary: str
 
 
-@dataclass(frozen=True)
-class NeedFactory:
-    recipe: tuple
-    summary_format: str
-
-    def create(self, gen: random.Random) -> Need:
-        return Need({}, self.summary_format)
+WANT_TO_SURVIVE = Motivation("survive")
 
 
 class Need:
@@ -40,13 +34,23 @@ class Need:
         return self.summary_format.format_map(self.properties)
 
 
+NEED_NOTHING = Need({}, "nothing")
+
+
 class Person(BaseComponent):
     parent: Actor
 
-    def __init__(self, type: PersonType, motivation: Motivation, need: Need):
-        self.type = type
+    def __init__(self, background: PersonType, motivation: Motivation = WANT_TO_SURVIVE, need: Need = NEED_NOTHING):
+        self.background = background
         self.motivation = motivation
         self.need = need
 
     def say(self, message: str) -> None:
-        self.engine.message_log.add_message(f"{self.type.article.capitalize()} {self.type.noun} says {message}.")
+        self.engine.message_log.add_message(
+            f"{self.background.article.capitalize()} {self.background.noun} says: {message}.")
+
+    def __str__(self):
+        summary = f"{self.background.article} {self.background.noun}"
+        if self.motivation is not WANT_TO_SURVIVE:
+            summary += f" (needs {self.need.summary} to {self.motivation.summary})"
+        return summary

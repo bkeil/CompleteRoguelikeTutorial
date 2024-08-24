@@ -1,4 +1,5 @@
 import random
+from typing import Any
 
 import worldgen.seed
 from worldgen import motivations, needs
@@ -35,9 +36,23 @@ _TYPES = [
 ]
 
 
-def new_person(gen: random.Random) -> Person:
+def source(gen: random.Random, spec: tuple) -> Any:
+    if spec[0] == "person":
+        if spec[1] == "headliner":
+            return new_headliner(gen)
+        elif spec[1] == "extra":
+            return new_extra(gen)
+    raise NotImplementedError()
+
+
+def new_headliner(gen: random.Random) -> Person:
     person_gen = worldgen.seed.new_generator(gen)
-    return Person(type=person_gen.choice(_TYPES),
+    return Person(background=person_gen.choice(_TYPES),
                   motivation=person_gen.choice(motivations.MOTIVATIONS),
-                  need=person_gen.choice(needs.NEEDS).create(person_gen),
+                  need=person_gen.choice(needs.NEEDS).create(person_gen, source),
                   )
+
+
+def new_extra(gen: random.Random) -> Person:
+    person_gen = worldgen.seed.new_generator(gen)
+    return Person(background=person_gen.choice(_TYPES))
