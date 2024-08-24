@@ -39,5 +39,5 @@ def new_person(gen: random.Random) -> Person:
     person_gen = worldgen.seed.new_generator(gen)
     return Person(type=person_gen.choice(_TYPES),
                   motivation=person_gen.choice(motivations.MOTIVATIONS),
-                  need=person_gen.choice(needs.NEEDS),
+                  need=person_gen.choice(needs.NEEDS).create(person_gen),
                   )
