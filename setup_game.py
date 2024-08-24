@@ -23,7 +23,7 @@ import input_handlers
 background_image = tcod.image.load("data/menu_background.png")[:, :, :3]
 
 
-def new_game(screen_width: int, screen_height: int) -> Engine:
+def new_game(screen_width: int, screen_height: int, clairvoyant: bool) -> Engine:
     """Return a brand new game session as an Engine instance."""
     map_width = screen_width
     map_height = screen_height - 7
@@ -41,6 +41,9 @@ def new_game(screen_width: int, screen_height: int) -> Engine:
     elif player.fighter.stats[attributes.CON] < 14:
         player.fighter.stats[attributes.CON] = 14
     player.fighter.abilities.append(abilities.KillingBlow())
+    player.clairvoyant = clairvoyant
+    if clairvoyant:
+        player.fighter.base_ac = 20
 
     dagger = copy.deepcopy(entity_types.dagger)
     war_shirt = copy.deepcopy(entity_types.war_shirt)
@@ -135,6 +138,7 @@ class MainMenu(input_handlers.BaseEventHandler):
                 traceback.print_exc()  # Print to stderr.
                 return input_handlers.PopupMessage(self, f"Failed to load save:\n{exc}")
         elif event.sym == tcod.event.KeySym.n:
-            return input_handlers.MainGameEventHandler(new_game(self.screen_width, self.screen_height))
+            clairvoyant = event.mod & tcod.event.KMOD_LSHIFT
+            return input_handlers.MainGameEventHandler(new_game(self.screen_width, self.screen_height, clairvoyant))
 
         return None
