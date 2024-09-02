@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import copy
 import random
 from typing import Any, Dict, Iterator, List, Optional, Tuple, TYPE_CHECKING
 
 import tcod
 from numpy import dtype, floating, ndarray
 
+import components.person
 from components.ai import QuestGiver
 import entity_types
 from game_map import GameMap
@@ -220,6 +222,7 @@ def generate_dungeon(
         map_height: int,
         engine: Engine,
         seed: int,
+        coming_from_previous: bool,
 ) -> GameMap:
     """Generate a new dungeon map."""
     player = engine.player
@@ -255,15 +258,26 @@ def generate_dungeon(
 
     rooms = list(node_rooms.values())
     gen.shuffle(rooms)
-    player.place(*rooms[0].center, game_map=dungeon)
-    dungeon.tiles[player.x, player.y] = tile_types.up_stairs
+
+    if coming_from_previous:
+        player.place(*rooms[0].center, game_map=dungeon)
+    else:
+        player.place(*rooms[-1].center, game_map=dungeon)
+
+    dungeon.tiles[rooms[0].center] = tile_types.up_stairs
     dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
 
+    drama = engine.game_world.drama
+
     if engine.game_world.current_floor == 1:
-        person = worldgen.people.new_headliner(gen)
+        person = components.person.Person(
+            background=drama.props["main_role"]["background"],
+            motivation=drama.props["main_role"]["motivation"],
+            need=drama.props["main_role"]["need"],
+        )
         quest_giver = entity_types.MobSpawner(
             char='p',
-            color=(230,255,230),
+            color=(230, 255, 230),
             name=person.background.noun.capitalize(),
             hit_dice=10,
             ai_cls=QuestGiver,
@@ -271,7 +285,25 @@ def generate_dungeon(
         quest_giver.person = person
         person.parent = quest_giver
 
+    if drama.props["antagonist"]["location"]["floor"] == engine.game_world.current_floor:
+        if drama.props["antagonist"]["race"]["noun"] == "orc":
+            quest_target_spawner = copy.deepcopy(entity_types.orc)
+        else:
+            raise NotImplementedError()
+
+        quest_target = quest_target_spawner.spawn(dungeon, *gen.choice(rooms).center)
+        quest_target.fighter.on_die = quest_reward
+        quest_target.color = (255, 255, 170)
+        quest_target.name = "That ORC!"
+
     return dungeon
+
+
+def quest_reward(engine: Engine, target: Entity):
+    print("Quest reward!")
+    engine.message_log.add_message("You finished the quest!")
+    p = engine.player
+    p.level.add_xp(p.level.experience_to_next_level)
 
 
 def generate_overland(

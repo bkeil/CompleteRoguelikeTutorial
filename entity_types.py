@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
-from typing import Sequence, Type, TYPE_CHECKING
+from typing import Callable, Sequence, Type, TYPE_CHECKING
 
 import attributes
 import color

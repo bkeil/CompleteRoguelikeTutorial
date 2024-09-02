@@ -43,7 +43,9 @@ def new_game(screen_width: int, screen_height: int, clairvoyant: bool) -> Engine
     player.fighter.abilities.append(abilities.KillingBlow())
     player.clairvoyant = clairvoyant
     if clairvoyant:
-        player.fighter.base_ac = 20
+        player.fighter.base_ac = 40
+        player.fighter.base_damage_bonus = 12
+        player.fighter.hp = 3000
 
     dagger = copy.deepcopy(entity_types.dagger)
     war_shirt = copy.deepcopy(entity_types.war_shirt)

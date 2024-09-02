@@ -1,5 +1,5 @@
 import random
-from typing import Any
+from typing import Any, Callable
 
 import worldgen.seed
 from worldgen import motivations, needs
@@ -45,7 +45,11 @@ def source(gen: random.Random, spec: tuple) -> Any:
     raise NotImplementedError()
 
 
-def new_headliner(gen: random.Random) -> Person:
+def new_type(gen: random.Random) -> PersonType:
+    return gen.choice(_TYPES)
+
+
+def new_headliner(gen: random.Random, source: Callable[[random.Random, tuple], Any]) -> Person:
     person_gen = worldgen.seed.new_generator(gen)
     return Person(background=person_gen.choice(_TYPES),
                   motivation=person_gen.choice(motivations.MOTIVATIONS),

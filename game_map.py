@@ -6,6 +6,7 @@ import numpy as np  # type: ignore
 from tcod.console import Console
 
 import color
+import worldgen.drama
 from entity import Actor, Item
 import tile_types
 
@@ -114,6 +115,7 @@ class GameWorld:
             current_floor: int = 0
     ):
         self.engine = engine
+        self.drama = None
 
         self.map_width = map_width
         self.map_height = map_height
@@ -125,7 +127,7 @@ class GameWorld:
 
         self.current_floor = current_floor
 
-    def generate_floor(self) -> None:
+    def generate_floor(self, coming_from_previous: bool) -> None:
         from procgen import generate_dungeon
 
         pwx, pwy = self.engine.player_world_location
@@ -136,6 +138,10 @@ class GameWorld:
                 + int(pwy) * 97
         )
 
+        if self.current_floor == 1 and coming_from_previous:
+            self.drama = worldgen.drama.Drama(seed=seed)
+            self.drama.generate()
+
         self.engine.game_map = generate_dungeon(
             max_rooms=self.max_rooms,
             room_min_size=self.room_min_size,
@@ -144,10 +150,12 @@ class GameWorld:
             map_height=self.map_height,
             engine=self.engine,
             seed=seed,
+            coming_from_previous=coming_from_previous,
         )
 
     def generate_overland(self) -> None:
         from procgen import generate_overland
+        self.drama = None
         self.engine.game_map = generate_overland(
             map_width=self.map_width,
             map_height=self.map_height,

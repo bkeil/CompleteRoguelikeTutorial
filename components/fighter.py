@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Callable, Dict, List, Optional, TYPE_CHECKING
 
 import components.equippable
 from attributes import Stat, STR, DEX, best_modifier, modifier
@@ -10,7 +10,8 @@ from components.equippable import Equippable, EquipmentType
 from render_order import RenderOrder
 
 if TYPE_CHECKING:
-    from entity import Actor
+    from engine import Engine
+    from entity import Actor, Entity
     import abilities
 
 UNARMED = Equippable(equipment_type=EquipmentType.WEAPON)
@@ -25,6 +26,7 @@ class Fighter(BaseComponent):
                  base_damage: tuple[int, int, int] = (1, 2, 0),
                  base_damage_bonus: int = 0,
                  skills: tuple[tuple[str, int], ...] = (),
+                 on_die: Callable[[Engine, Entity], None] | None = None,
                  ):
         self.max_hp = hp
         self._hp = hp
@@ -33,6 +35,7 @@ class Fighter(BaseComponent):
         self.base_damage = base_damage
         self.base_damage_bonus = base_damage_bonus
         self.skills: Dict[str, int] = {}
+        self.on_die = on_die
         for skill, level in skills:
             self.skills[skill] = level
         self.abilities: List[abilities.Ability] = []
@@ -125,6 +128,9 @@ class Fighter(BaseComponent):
         self.hp -= amount
 
     def die(self) -> None:
+        if self.on_die:
+            self.on_die(self.engine, self.parent)
+
         if self.engine.player is self.parent:
             death_message = "You died!"
             death_message_color = color.player_die

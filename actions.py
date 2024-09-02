@@ -124,16 +124,18 @@ class TakeStairsAction(Action):
         if self.down and tile == tile_types.down_stairs:
             self.engine.game_world.current_floor += 1
             message = "You descend the staircase."
+            coming_from_previous = True
         elif (not self.down) and tile == tile_types.up_stairs:
             self.engine.game_world.current_floor -= 1
             message = "You ascend the staircase."
+            coming_from_previous = False
         else:
             raise exceptions.Impossible("There are no stairs here.")
 
         if self.engine.game_world.current_floor == 0:
             self.engine.game_world.generate_overland()
         else:
-            self.engine.game_world.generate_floor()
+            self.engine.game_world.generate_floor(coming_from_previous)
 
         self.engine.message_log.add_message(message, color.descend)
 
