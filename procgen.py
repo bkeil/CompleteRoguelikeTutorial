@@ -235,7 +235,7 @@ def generate_dungeon(
         min_height=8,
         max_horizontal_ratio=2,
         max_vertical_ratio=2,
-        seed=tcod.random.Random(seed=seed).random_c,
+        seed=tcod.random.Random(seed=seed),
     )
 
     gen = random.Random(seed)

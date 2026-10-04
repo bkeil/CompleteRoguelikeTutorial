@@ -162,8 +162,8 @@ class EventHandler(BaseEventHandler):
         return True
 
     def ev_mousemotion(self, event: tcod.event.MouseMotion) -> None:
-        if self.engine.game_map.in_bounds(event.position.x, event.position.y):
-            self.engine.mouse_location = event.position.x, event.position.y
+        if self.engine.game_map.in_bounds(int(event.position.x), int(event.position.y)):
+            self.engine.mouse_location = int(event.position.x), int(event.position.y)
 
     def on_render(self, console: tcod.console.Console) -> None:
         self.engine.render(console)
@@ -479,9 +479,10 @@ class SelectIndexHandler(AskUserEventHandler):
 
     def ev_mousebuttondown(self, event: tcod.event.MouseButtonDown) -> Optional[Action]:
         """Left click confirms a selection."""
-        if self.engine.game_map.in_bounds(*event.position):
+        x, y = int(event.position.x), int(event.position.y)
+        if self.engine.game_map.in_bounds(x, y):
             if event.button == 1:
-                return self.on_index_selected(*event.position)
+                return self.on_index_selected(x, y)
         return super().ev_mousebuttondown(event)
 
     def on_index_selected(self, x: int, y: int) -> Optional[ActionOrHandler]:
